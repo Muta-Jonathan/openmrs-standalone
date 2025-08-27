@@ -13,6 +13,11 @@
 			<outputDirectory>${project.build.finalName}/tomcat/webapps</outputDirectory>
 			<destName>openmrs.war</destName>
 		</file>
+		<file>
+			<source>${project.build.directory}/distro/web/openmrs-distro.properties</source>
+			<outputDirectory>${project.build.finalName}/appdata/</outputDirectory>
+			<destName>openmrs-distro.properties</destName>
+		</file>
 	</files>
 	<fileSets>
 		<fileSet>

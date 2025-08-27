@@ -10,7 +10,10 @@
 	<fileSets>
 		<fileSet>
 			<outputDirectory>/</outputDirectory>
-			<directory>${project.build.directory}/emptydatabase/data</directory>
+			<directory>${project.basedir}/src/main/db</directory>
+			<includes>
+				<include>empty-db-*.sql</include>
+			</includes>
 		</fileSet>
 	</fileSets>
 </assembly>

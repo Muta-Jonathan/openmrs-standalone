@@ -13,6 +13,8 @@
  */
 package org.openmrs.standalone;
 
+import ch.vorburger.mariadb4j.DB;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,7 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Properties;
+
+import static org.openmrs.standalone.MariaDbController.ROOT_USER;
+import static org.openmrs.standalone.MariaDbController.ROOT_PASSWORD;
+import static org.openmrs.standalone.MariaDbController.DATABASE_NAME;
 
 public class OpenmrsUtil {
 	
@@ -227,7 +234,7 @@ public class OpenmrsUtil {
 	 * Convenience method used to load properties from the given file.
 	 * 
 	 * @param props the properties object to be loaded into
-	 * @param propertyFile the properties file to read
+	 * @param inputStream the properties file to read
 	 */
 	private static void loadProperties(Properties props, InputStream inputStream) {
 		try {
@@ -274,4 +281,44 @@ public class OpenmrsUtil {
 	public static String getTitle() {
 		return "OpenMRS " + REFAPP_VERSION + " Standalone";
 	}
+
+	/**
+	 * Imports an SQL file into the database.
+	 *
+	 * @param sqlFile   The SQL file to import
+	 */
+	public static void importSqlFile(File sqlFile) {
+		if (!sqlFile.exists()) {
+			System.err.println("❌ SQL file not found: " + sqlFile.getAbsolutePath());
+			return;
+		}
+
+		System.out.println("✅ Preparing to import data from " + sqlFile);
+
+		// Using MariaDbController's DB instance
+		DB dbInstance = getDB();
+		if (dbInstance == null) {
+			throw new IllegalStateException("MariaDB has not been started. Call MariaDbController.startMariaDB() first.");
+		}
+
+		try (InputStream in = Files.newInputStream(sqlFile.toPath())) {
+			System.out.println("📥 Importing SQL from: " + sqlFile.getAbsolutePath());
+			dbInstance.source(in, ROOT_USER, ROOT_PASSWORD, DATABASE_NAME);
+			System.out.println("✅ Successfully imported SQL: " + sqlFile.getAbsolutePath());
+		} catch (Exception e) {
+			System.err.println("❌ Error importing SQL: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	private static DB getDB() {
+		try {
+			java.lang.reflect.Field f = MariaDbController.class.getDeclaredField("mariaDB");
+			f.setAccessible(true);
+			return (DB) f.get(null);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 }

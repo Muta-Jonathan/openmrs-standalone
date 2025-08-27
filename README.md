@@ -11,6 +11,29 @@
 -> output is in the target folder, as referenceapplkication-standalone-(refapp.version).zip
 -> the contents of that zip are in the similarly-named folder under /target, if you want to test in-place
 
+
+The standalone now supports loading a pre-initialized SQL database dump (from an SDK 2.x server).
+This bypasses the slow XML/metadata bootstrapping and ensures demo data + search index are ready immediately.
+
+## 🛠️ HOW TO EXTRACT SQL DUMPS FROM A RUNNING SDK INSTANCE
+You can speed up the standalone by bundling it with an SQL dump of a fully initialized OpenMRS SDK 2.x server.
+
+1. **Run your SDK RefApp 2.x instance and finish setup.**
+2. Once everything is initialized (demo data, search index rebuilt), run this command from terminal:
+
+```bash
+mysqldump --single-transaction -u root -p openmrs > demo-db-2.13.0.sql
+```
+Replace 2.13.0 with your current RefApp 2.x version.
+
+Place the dump in:
+
+```bash
+<project-root>/src/main/db/demo-db-2.13.0.sql       # for demo content
+<project-root>/src/main/db/empty-db-2.13.0.sql      # if it's an empty schema only
+```
+The standalone will auto-detect and load the corresponding SQL dump based on your refapp.version.
+
 ### Building with OpenMRS Core Snapshots
 
 The **Reference Application Standalone 2.x** depends on **OpenMRS Core 2.8.x-SNAPSHOT** artifacts.

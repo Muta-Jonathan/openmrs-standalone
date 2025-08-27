@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
 
 import ch.vorburger.exec.ManagedProcessException;
 
+import static org.openmrs.standalone.OpenmrsUtil.importSqlFile;
+
 /**
  * Utility routines used by the standalone application.
  */
@@ -452,6 +454,19 @@ public class StandaloneUtil {
 			// Check if connection is valid
 			if (conn.isValid(5)) {
 				System.out.println("✅ Connection to MariaDB successful.");
+
+				// Find sql if exist to preload DB
+				File dataDir = new File("db/data");
+
+				if (dataDir.exists() && dataDir.isDirectory()) {
+					// Find the first .sql file in the unzipped folder
+					File[] sqlFiles = dataDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".sql"));
+					if (sqlFiles != null && sqlFiles.length != 0) {
+						// Run the first found SQL file
+						File sqlFile = sqlFiles[0];
+						importSqlFile(sqlFile);
+					}
+				}
 			} else {
 				System.err.println("❌ Connection established, but it is not valid.");
 			}
